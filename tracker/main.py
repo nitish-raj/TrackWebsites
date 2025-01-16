@@ -32,6 +32,10 @@ def main():
             if new_items:
                 new_listings.append({"url": url, "new_items": new_items})
 
+            # Clean up price formatting in content
+            for item in content:
+                item["price"] = item["price"].replace("\u00a3", "£")
+
             current_state[url] = content
 
         if new_listings:
