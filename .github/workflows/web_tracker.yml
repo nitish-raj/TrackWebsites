@@ -11,7 +11,9 @@ jobs:
 
     steps:
     - name: Checkout Repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
+      with:
+        ref: master
 
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -29,11 +31,7 @@ jobs:
     - name: Debug Git Status
       run: |
         echo "Debugging Git Status"
-        git status
-
-    - name: Ensure Files are Tracked
-      run: |
-        git add data/website_state.json
+        ls -la
         git status
 
     - name: Check for Changes
