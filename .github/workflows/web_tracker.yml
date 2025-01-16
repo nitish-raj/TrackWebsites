@@ -72,4 +72,4 @@ jobs:
         subject: "Website Tracker: New Listings"
         to: ${{ secrets.RECIPIENT_EMAIL }}
         from: "Website Tracker <${{ secrets.EMAIL }}>"
-        body: file://data/email_content.html
+        body: file://data/email_content.txt
