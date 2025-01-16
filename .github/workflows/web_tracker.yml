@@ -2,7 +2,7 @@ name: Website Tracker
 
 on:
   schedule:
-    - cron: "0 9 * * *" # Run at 9 AM and 9 PM UTC
+    - cron: "0 9 * * *" # Run at 9 AM UTC every day
   workflow_dispatch:       # Allow manual triggering
 
 jobs:
@@ -12,19 +12,16 @@ jobs:
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v4
-      with:
-        ref: master
 
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.x'
+        python-version: '3.12'
 
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
         pip install requests beautifulsoup4 python-dotenv
-        ls -la
 
     - name: Run Website Tracker
       run: python tracker/main.py
@@ -34,15 +31,27 @@ jobs:
         echo "Debugging Git Status"
         ls -la
         git status
+        echo "Current branch: $(git branch --show-current)"
+        echo "Last commit: $(git log -1 --oneline)"
 
     - name: Check for Changes
       id: check_changes
       run: |
-        if git diff --quiet data/website_state.json; then
-          echo "No changes in website_state.json"
-          echo "skip_commit=true" >> $GITHUB_ENV
+        set -e
+        if git ls-files --error-unmatch data/website_state.json > /dev/null 2>&1; then
+          echo "File is tracked. Checking for changes..."
+          if git diff --quiet data/website_state.json; then
+            echo "No changes in website_state.json"
+            echo "changes_detected=false" >> $GITHUB_OUTPUT
+            echo "skip_commit=true" >> $GITHUB_ENV
+          else
+            echo "Changes detected in website_state.json"
+            echo "changes_detected=true" >> $GITHUB_OUTPUT
+            echo "skip_commit=false" >> $GITHUB_ENV
+          fi
         else
-          echo "Changes detected in website_state.json"
+          echo "File is untracked or missing. Changes assumed."
+          echo "changes_detected=true" >> $GITHUB_OUTPUT
           echo "skip_commit=false" >> $GITHUB_ENV
         fi
 
