@@ -1,13 +1,13 @@
 import os
 import json
-from utils import fetch_website_content, load_previous_state, save_current_state, generate_email_content
+from utils import fetch_website_content, load_previous_state, save_current_state, generate_plain_text_email
 from dotenv import load_dotenv
 from pathlib import Path
 
 data_folder = Path(__file__).resolve().parent.parent / "data"
 data_folder.mkdir(exist_ok=True)
 state_file = data_folder / "website_state.json"
-email_file_path = data_folder / "email_content.html"
+email_file_path = data_folder / "email_content.txt"
 
 env_path = Path(__file__).resolve().parent.parent / ".env"
 load_dotenv(dotenv_path=env_path)
@@ -37,7 +37,7 @@ def main():
             current_state[url] = content
 
         if new_listings:
-            email_content = generate_email_content(new_listings)
+            email_content = generate_plain_text_email(new_listings)
 
             # Save email content to a file for GitHub Actions
             with open(email_file_path, "w") as email_file:
@@ -45,7 +45,7 @@ def main():
 
         save_current_state(current_state, state_file)
     except Exception as e:
-        error_content = f"<html><body><h2 style='color: red;'>Error in Website Tracker</h2><p>An error occurred:<br>{e}</p></body></html>"
+        error_content = f"Error in Website Tracker\nAn error occurred:\n{e}\n"
         with open(email_file_path, "w") as email_file:
             email_file.write(error_content)
 

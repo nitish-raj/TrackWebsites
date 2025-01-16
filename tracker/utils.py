@@ -2,7 +2,6 @@ import json
 import requests
 from bs4 import BeautifulSoup
 from pathlib import Path
-from jinja2 import Template
 
 def fetch_website_content(url):
     """
@@ -37,6 +36,7 @@ def fetch_website_content(url):
     except Exception as e:
         raise Exception(f"Error fetching content from {url}: {e}")
 
+
 def load_previous_state(state_file):
     """
     Loads the previous state of the website content from the state file.
@@ -52,6 +52,7 @@ def load_previous_state(state_file):
             return json.load(f)
     return {}
 
+
 def save_current_state(state, state_file):
     """
     Saves the current state of the website content to the state file.
@@ -63,36 +64,23 @@ def save_current_state(state, state_file):
     with open(state_file, "w") as f:
         json.dump(state, f, indent=4)
 
-def generate_email_content(new_listings):
+
+def generate_plain_text_email(new_listings):
     """
-    Generates an HTML email content for new listings using Jinja2 templates.
+    Generates a plain text email content for new listings.
 
     Args:
         new_listings (list): A list of dictionaries containing new listings.
 
     Returns:
-        str: The rendered HTML email content.
+        str: The plain text email content.
     """
-    html_template = """
-    <html>
-      <body style="font-family: Arial, sans-serif; line-height: 1.6;">
-        <h2 style="color: #333;">New Listings Found</h2>
-        {% for site in listings %}
-          <h3 style="color: #555;">From: {{ site.url }}</h3>
-          <ul style="list-style-type: none; padding: 0;">
-          {% for item in site.new_items %}
-            <li style="margin-bottom: 20px;">
-              <p><strong style="font-size: 16px;">{{ item.title }}</strong></p>
-              <p style="color: #555;">Price: {{ item.price }}</p>
-              {% if item.image %}
-              <img src="{{ item.image }}" style="max-width: 200px; height: auto; margin-top: 10px;">
-              {% endif %}
-            </li>
-          {% endfor %}
-          </ul>
-        {% endfor %}
-      </body>
-    </html>
-    """
-    template = Template(html_template)
-    return template.render(listings=new_listings)
+    email_content = "New Listings Found:\n\n"
+    for listing in new_listings:
+        email_content += f"From: {listing['url']}\n"
+        for item in listing['new_items']:
+            email_content += f"- Title: {item['title']}\n  Price: {item['price']}\n"
+            if item['image']:
+                email_content += f"  Image: {item['image']}\n"
+        email_content += "\n"
+    return email_content
