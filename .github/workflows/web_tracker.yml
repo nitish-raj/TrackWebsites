@@ -14,7 +14,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@c624d7739b2e058d9177b3bbafc528ffddfccaa7 #v4
+      uses: actions/setup-python@v4
       with:
         python-version: '3.12'
 
@@ -66,7 +66,7 @@ jobs:
 
     - name: Send Email
       if: env.skip_commit == 'false'
-      uses: dawidd6/action-send-mail@v4
+      uses: dawidd6/action-send-mail@c624d7739b2e058d9177b3bbafc528ffddfccaa7 #v4
       with:
         connection_url: ${{ secrets.MAIL_CONNECTION }}
         subject: "Website Tracker: New Listings"
