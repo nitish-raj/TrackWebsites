@@ -2,7 +2,7 @@ name: Website Tracker
 
 on:
   schedule:
-    - cron: "0 9 * * *" # Run at 9 AM UTC
+    - cron: "0 9 * * *" # Run at 9 AM and 9 PM UTC
   workflow_dispatch:       # Allow manual triggering
 
 jobs:
@@ -26,9 +26,16 @@ jobs:
     - name: Run Website Tracker
       run: python tracker/main.py
 
+    - name: Debug Git Status
+      run: |
+        echo "Debugging Git Status"
+        git status
+        ls -la data
+
     - name: Check for Changes
       id: check_changes
       run: |
+        git diff --exit-code data/website_state.json || echo "Changes detected."
         if git diff --quiet data/website_state.json; then
           echo "No changes in website_state.json"
           echo "skip_commit=true" >> $GITHUB_ENV
