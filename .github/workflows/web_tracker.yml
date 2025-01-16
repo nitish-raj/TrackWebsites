@@ -30,12 +30,15 @@ jobs:
       run: |
         echo "Debugging Git Status"
         git status
-        ls -la data
+
+    - name: Ensure Files are Tracked
+      run: |
+        git add data/website_state.json
+        git status
 
     - name: Check for Changes
       id: check_changes
       run: |
-        git diff --exit-code data/website_state.json || echo "Changes detected."
         if git diff --quiet data/website_state.json; then
           echo "No changes in website_state.json"
           echo "skip_commit=true" >> $GITHUB_ENV
