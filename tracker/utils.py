@@ -2,6 +2,7 @@ import json
 import requests
 from bs4 import BeautifulSoup
 from pathlib import Path
+from jinja2 import Template
 
 def fetch_website_content(url):
     """
@@ -61,3 +62,37 @@ def save_current_state(state, state_file):
     """
     with open(state_file, "w") as f:
         json.dump(state, f, indent=4)
+
+def generate_email_content(new_listings):
+    """
+    Generates an HTML email content for new listings using Jinja2 templates.
+
+    Args:
+        new_listings (list): A list of dictionaries containing new listings.
+
+    Returns:
+        str: The rendered HTML email content.
+    """
+    html_template = """
+    <html>
+      <body style="font-family: Arial, sans-serif; line-height: 1.6;">
+        <h2 style="color: #333;">New Listings Found</h2>
+        {% for site in listings %}
+          <h3 style="color: #555;">From: {{ site.url }}</h3>
+          <ul style="list-style-type: none; padding: 0;">
+          {% for item in site.new_items %}
+            <li style="margin-bottom: 20px;">
+              <p><strong style="font-size: 16px;">{{ item.title }}</strong></p>
+              <p style="color: #555;">Price: {{ item.price }}</p>
+              {% if item.image %}
+              <img src="{{ item.image }}" style="max-width: 200px; height: auto; margin-top: 10px;">
+              {% endif %}
+            </li>
+          {% endfor %}
+          </ul>
+        {% endfor %}
+      </body>
+    </html>
+    """
+    template = Template(html_template)
+    return template.render(listings=new_listings)

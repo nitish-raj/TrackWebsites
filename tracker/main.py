@@ -1,10 +1,9 @@
 import os
 import json
-from utils import fetch_website_content, load_previous_state, save_current_state
+from utils import fetch_website_content, load_previous_state, save_current_state, generate_email_content
 from dotenv import load_dotenv
 from pathlib import Path
 
-# Load .env for local testing
 data_folder = Path(__file__).resolve().parent.parent / "data"
 data_folder.mkdir(exist_ok=True)
 state_file = data_folder / "website_state.json"
@@ -24,7 +23,7 @@ def main():
         new_listings = []
 
         for url in urls:
-            content = fetch_website_content(url)  # Extract only the car listings with pictures
+            content = fetch_website_content(url)
 
             previous_content = previous_state.get(url, [])
             new_items = [item for item in content if item not in previous_content]
@@ -32,34 +31,23 @@ def main():
             if new_items:
                 new_listings.append({"url": url, "new_items": new_items})
 
-            # Clean up price formatting in content
             for item in content:
                 item["price"] = item["price"].replace("\u00a3", "£")
 
             current_state[url] = content
 
         if new_listings:
-            email_body = "<html><body style='font-family: Arial, sans-serif; line-height: 1.6;'>"
-            for listing in new_listings:
-                email_body += f"<h2 style='color: #333;'>New Listings from {listing['url']}:</h2>\n<ul style='list-style-type: none; padding: 0;'>"
-                for item in listing['new_items']:
-                    email_body += (
-                        f"<li style='margin-bottom: 20px;'>"
-                        f"<strong style='font-size: 16px;'>{item['title']}</strong> - <span style='color: #555;'>{item['price']}</span><br>"
-                        f"<img src='{item['image']}' alt='{item['title']}' style='width: 200px; height: auto; margin-top: 10px;'/></li>"
-                    )
-                email_body += "</ul><br>"
-            email_body += "</body></html>"
+            email_content = generate_email_content(new_listings)
 
             # Save email content to a file for GitHub Actions
             with open(email_file_path, "w") as email_file:
-                email_file.write(email_body)
+                email_file.write(email_content)
 
         save_current_state(current_state, state_file)
     except Exception as e:
-        # Save error message to a file for GitHub Actions
+        error_content = f"<html><body><h2 style='color: red;'>Error in Website Tracker</h2><p>An error occurred:<br>{e}</p></body></html>"
         with open(email_file_path, "w") as email_file:
-            email_file.write(f"<html><body style='font-family: Arial, sans-serif;'><h2 style='color: red;'>Error in Website Tracker</h2><p>An error occurred:<br>{e}</p></body></html>")
+            email_file.write(error_content)
 
 if __name__ == "__main__":
     main()
