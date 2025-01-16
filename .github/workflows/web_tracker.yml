@@ -2,7 +2,7 @@ name: Website Tracker
 
 on:
   schedule:
-    - cron: "0 9,21 * * *" # Run at 9 AM and 9 PM UTC
+    - cron: "0 9 * * *" # Run at 9 AM UTC
   workflow_dispatch:       # Allow manual triggering
 
 jobs:
@@ -26,7 +26,19 @@ jobs:
     - name: Run Website Tracker
       run: python tracker/main.py
 
+    - name: Check for Changes
+      id: check_changes
+      run: |
+        if git diff --quiet data/website_state.json; then
+          echo "No changes in website_state.json"
+          echo "skip_commit=true" >> $GITHUB_ENV
+        else
+          echo "Changes detected in website_state.json"
+          echo "skip_commit=false" >> $GITHUB_ENV
+        fi
+
     - name: Commit Updated State
+      if: env.skip_commit == 'false'
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
@@ -35,6 +47,7 @@ jobs:
         git push
 
     - name: Send Email
+      if: env.skip_commit == 'false'
       uses: dawidd6/action-send-mail@v4
       with:
         connection_url: ${{ secrets.MAIL_CONNECTION }}

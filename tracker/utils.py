@@ -23,7 +23,7 @@ def fetch_website_content(url):
         products = soup.select("li.product")
         for product in products:
             title = product.select_one(".woocommerce-loop-product__title").text.strip()
-            price = product.select_one(".price").text.strip() if product.select_one(".price") else "N/A"
+            price = product.select_one(".price").text.strip().replace("\u00a3", "£") if product.select_one(".price") else "N/A"
             image = product.select_one("img").get("src", "").strip() if product.select_one("img") else "No Image"
             details = {
                 "title": title,
