@@ -39,11 +39,15 @@ def main():
             current_state[url] = content
 
         if new_listings:
-            email_body = "<html><body>"
+            email_body = "<html><body style='font-family: Arial, sans-serif; line-height: 1.6;'>"
             for listing in new_listings:
-                email_body += f"<h2>New Listings from {listing['url']}:</h2>\n<ul>"
+                email_body += f"<h2 style='color: #333;'>New Listings from {listing['url']}:</h2>\n<ul style='list-style-type: none; padding: 0;'>"
                 for item in listing['new_items']:
-                    email_body += f"<li><strong>{item['title']}</strong> - {item['price']}<br><img src='{item['image']}' alt='{item['title']}' width='200'/></li>\n"
+                    email_body += (
+                        f"<li style='margin-bottom: 20px;'>"
+                        f"<strong style='font-size: 16px;'>{item['title']}</strong> - <span style='color: #555;'>{item['price']}</span><br>"
+                        f"<img src='{item['image']}' alt='{item['title']}' style='width: 200px; height: auto; margin-top: 10px;'/></li>"
+                    )
                 email_body += "</ul><br>"
             email_body += "</body></html>"
 
@@ -55,7 +59,7 @@ def main():
     except Exception as e:
         # Save error message to a file for GitHub Actions
         with open(email_file_path, "w") as email_file:
-            email_file.write(f"<html><body><h2>Error in Website Tracker</h2><p>An error occurred:<br>{e}</p></body></html>")
+            email_file.write(f"<html><body style='font-family: Arial, sans-serif;'><h2 style='color: red;'>Error in Website Tracker</h2><p>An error occurred:<br>{e}</p></body></html>")
 
 if __name__ == "__main__":
     main()
